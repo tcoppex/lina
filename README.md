@@ -33,6 +33,6 @@ _(still wip)_
 ### 6. Streaming Support
    - Operators for outputting vectors and matrices to `std::ostream`.
 
-## License
+## Unlicense
 
 **lina** is released under The Unlicense.
