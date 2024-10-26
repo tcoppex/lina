@@ -1,6 +1,6 @@
 # lina
 
-**lina** is a lightweight & header only linear algebra library built as an extension to [linalg](https://github.com/sgorsten/linalg/tree/v2.1) v2.2 from Sterling Orsten.
+**lina** is a lightweight & header only linear algebra library built as an extension to [linalg](https://github.com/sgorsten/linalg/tree/v2.2) v2.2 from Sterling Orsten.
 It's basically linalg with extra steps and a different namespace.
 
 _(still wip)_
