@@ -15,6 +15,8 @@ _(still wip)_
    - Predefined constants: `kTwoPi`, `kPi`, `kHalfPi`, `kQuarterPi`, `kInvPi`, `kHalfLog`, `kEpsilon`.
 
 #### Utility Functions
+   - **Pointer accessor**: Function to access data memory address (`ptr()`).
+   - **Vector / Matrix Conversion**: Functions for converting to lower dimensions structure (`to_vec2()`, `to_vec3()`, `to_mat3()`). 
    - **Angle Conversion**: Functions for converting between degrees and radians (`degrees()`, `radians()`).
    - **Min/Max**: Utility functions for finding minimum and maximum values among four inputs (`min4()`, `max4()`).
    - **Comparisons**: `almost_equal()` to check near-equality for floating-point values.

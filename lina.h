@@ -84,21 +84,25 @@ constexpr LINA_FP kInvPi        = 1.0 / kPi;
 //
 // Functions.
 //
-template<typename T>
-inline constexpr T degrees(T const& _radians) { return _radians * (180.0 / kPi); }
 
-template<typename T>
-inline constexpr T radians(T const& _degrees) { return _degrees * (kPi / 180.0); }
+template<class T, int M> constexpr T* ptr(linalg::vec<T, M> & v) { return &v.x; }
+template<class T, int M, int N> constexpr T* ptr(linalg::mat<T, M, N> & m) { return &m.x.x; }
 
-template<typename T>
-inline constexpr T min4(T const& a, T const& b, T const& c, T const& d) {
-  return min( a, min( b, min( c, d)));
-}
+template<class T, int M> constexpr T const* ptr(linalg::vec<T, M> const& v) { return &v.x; }
+template<class T, int M, int N> constexpr T const* ptr(linalg::mat<T, M, N> const& m) { return &m.x.x; }
 
-template<typename T>
-inline constexpr T max4(T const& a, T const& b, T const& c, T const& d) {
-  return max( a, max( b, max( c, d)));
-}
+template<class T> constexpr linalg::vec<T, 2> to_vec2(linalg::vec<T, 3> const& v) { return {v.x,v.y}; }
+template<class T> constexpr linalg::vec<T, 3> to_vec3(linalg::vec<T, 4> const& v) { return {v.x,v.y,v.z}; }
+
+template<class T> constexpr linalg::mat<T, 3, 3> to_mat3(linalg::mat<T, 4, 4> const& v) { return {to_vec3(v.x),to_vec3(v.y),to_vec3(v.z)}; }
+
+template<class T> constexpr linalg::vec<T, 4> quat_identity() { return {0,0,0,1}; }
+
+template<typename T> constexpr T degrees(T const& _radians) { return _radians * (180.0 / kPi); }
+template<typename T> constexpr T radians(T const& _degrees) { return _degrees * (kPi / 180.0); }
+
+template<typename T> constexpr T min4(T const& a, T const& b, T const& c, T const& d) { return min( a, min( b, min( c, d))); }
+template<typename T> constexpr T max4(T const& a, T const& b, T const& c, T const& d) { return max( a, max( b, max( c, d))); }
 
 template<typename T>
 constexpr bool almost_equal(T const& a, T const& b) {
