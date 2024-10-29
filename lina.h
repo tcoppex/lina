@@ -265,7 +265,9 @@ END_LINA_NAMESPACE
 // Types interoperability.
 //
 
-#if defined(__cpp_lib_ios)
+#if defined(LINA_OSTREAM)
+
+#include <iostream>
 
 template<typename T> std::ostream &operator<<(std::ostream& o, linalg::vec<T,2> const& v) {
   return o << "(" << v.x << ", " << v.y << ")";
