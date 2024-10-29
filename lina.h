@@ -97,7 +97,7 @@ template<class T> constexpr linalg::vec<T, 3> to_vec3(linalg::vec<T, 4> const& v
 
 template<class T> constexpr linalg::mat<T, 3, 3> to_mat3(linalg::mat<T, 4, 4> const& v) { return {to_vec3(v.x),to_vec3(v.y),to_vec3(v.z)}; }
 
-template<class T> constexpr linalg::vec<T, 4> quat_identity() { return {0,0,0,1}; }
+template<class T> constexpr linalg::vec<T, 4> qidentity() { return {0,0,0,1}; }
 
 template<typename T> constexpr T degrees(T const& _radians) { return _radians * (180.0 / kPi); }
 template<typename T> constexpr T radians(T const& _degrees) { return _degrees * (kPi / 180.0); }
@@ -106,11 +106,11 @@ template<typename T> constexpr T min4(T const& a, T const& b, T const& c, T cons
 template<typename T> constexpr T max4(T const& a, T const& b, T const& c, T const& d) { return max( a, max( b, max( c, d))); }
 
 template<typename T>
-constexpr bool almost_equal(T const& a, T const& b) {
-  static_assert( std::is_floating_point<T>::value );
+constexpr bool almost_equal(T const& a, T const& b, T tolerance = kEpsilon) {
+  static_assert(std::is_floating_point<T>::value);
   T const distance = linalg::abs(b - a);
-  return (distance < std::numeric_limits<T>::epsilon())
-      || (distance < (std::numeric_limits<T>::min() * linalg::abs(b + a)));
+  return (distance <= tolerance)
+      || (distance <= std::numeric_limits<T>::min() * std::fabs(b + a));
 }
 
 template<typename T>
