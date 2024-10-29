@@ -73,7 +73,8 @@ using vec4u = vec4<uint32_t>;
 //
 // Constants.
 //
-constexpr LINA_FP kEpsilon      = std::numeric_limits<LINA_FP>::epsilon();
+constexpr LINA_FP kTrueEpsilon  = std::numeric_limits<LINA_FP>::epsilon();
+constexpr LINA_FP kEpsilon      = 10.0f * kTrueEpsilon;
 constexpr LINA_FP kHalfLog      = -0.693147180599;  // log(0.5);
 constexpr LINA_FP kQuarterPi    = 0.785398163397;   // atanf(1.0f);
 constexpr LINA_FP kHalfPi       = 2.0 * kQuarterPi;
