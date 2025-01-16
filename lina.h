@@ -1,3 +1,9 @@
+//  lina.h - v0.1.1
+//
+//  Public domain linear algebra header, wrapping sgorsten/linalg.h
+//  <http://unlicense.org/>
+//
+
 #ifndef LINA_LINA_H_
 #define LINA_LINA_H_
 
@@ -8,7 +14,7 @@
 #define UNDEF_MSC_VER
 #endif
 
-#include "linalg/linalg.h" // v2.2
+#include "linalg.h" // v2.2
 using namespace linalg::aliases;
 
 #ifdef UNDEF_MSC_VER
@@ -21,15 +27,20 @@ using namespace linalg::aliases;
 /* -------------------------------------------------------------------------- */
 
 #ifdef LINA_NO_NAMESPACE
+
 #define BEGIN_LINA_NAMESPACE  namespace {
 #define END_LINA_NAMESPACE    }
+
 #else
+
 #ifndef LINA_NAMESPACE
 #define LINA_NAMESPACE lina
-#endif
+#endif // LINA_NAMESPACE
+
 #define BEGIN_LINA_NAMESPACE  namespace LINA_NAMESPACE {
 #define END_LINA_NAMESPACE    }
-#endif
+
+#endif // LINA_NO_NAMESPACE
 
 /* -------------------------------------------------------------------------- */
 
@@ -193,7 +204,7 @@ linalg::mat<T,4,4> frustum_tan_fov_matrix(T l, T r, T d, T u, T n, T f, linalg::
 
 template<class T>
 linalg::mat<T,4,4> perspective_fov_matrix(T angleLeft, T angleRight, T angleDown, T angleUp, T n, T f, linalg::fwd_axis a = linalg::neg_z, linalg::z_range z = linalg::neg_one_to_one) {
-  return lina::frustum_tan_fov_matrix(std::tan(angleLeft), std::tan(angleRight), std::tan(angleDown), std::tan(angleUp), n, f, a, z);
+  return frustum_tan_fov_matrix(std::tan(angleLeft), std::tan(angleRight), std::tan(angleDown), std::tan(angleUp), n, f, a, z);
 }
 
 template <class T>
