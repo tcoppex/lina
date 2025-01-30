@@ -1,4 +1,4 @@
-//  lina.h - v0.1.1
+//  lina.h - v0.2.0
 //
 //  Public domain linear algebra header, wrapping sgorsten/linalg.h
 //  <http://unlicense.org/>
@@ -59,27 +59,46 @@ BEGIN_LINA_NAMESPACE
 //
 namespace aliases {
 
-template<class T> using vec2 = linalg::vec<T,2>;
-template<class T> using vec3 = linalg::vec<T,3>;
-template<class T> using vec4 = linalg::vec<T,4>;
+template<class T> using vec2_t = linalg::vec<T,2>;
+template<class T> using vec3_t = linalg::vec<T,3>;
+template<class T> using vec4_t = linalg::vec<T,4>;
 
-using vec2f = vec2<LINA_FP>;
-using vec3f = vec3<LINA_FP>;
-using vec4f = vec4<LINA_FP>;
+using vec2f = vec2_t<LINA_FP>;
+using vec3f = vec3_t<LINA_FP>;
+using vec4f = vec4_t<LINA_FP>;
+
+using vec2i = vec2_t<int32_t>;
+using vec3i = vec3_t<int32_t>;
+using vec4i = vec4_t<int32_t>;
+
+using vec2u = vec2_t<uint32_t>;
+using vec3u = vec3_t<uint32_t>;
+using vec4u = vec4_t<uint32_t>;
+
 using mat3f = linalg::mat<LINA_FP, 3, 3>;
 using mat4f = linalg::mat<LINA_FP, 4, 4>;
 // using mat3x3f = mat3f;
 // using mat4x4f = mat4f;
 
-using vec2i = vec2<int32_t>;
-using vec3i = vec3<int32_t>;
-using vec4i = vec4<int32_t>;
+// GLSL types
+using vec2 = vec2f;
+using vec3 = vec3f;
+using vec4 = vec4f;
 
-using vec2u = vec2<uint32_t>;
-using vec3u = vec3<uint32_t>;
-using vec4u = vec4<uint32_t>;
+using uvec2 = vec2u;
+using uvec3 = vec3u;
+using uvec4 = vec4u;
 
-}
+using ivec2 = vec2i;
+using ivec3 = vec3i;
+using ivec4 = vec4i;
+
+using mat3 = mat3f;
+using mat4 = mat4f;
+using mat3x3 = mat3;
+using mat4x4 = mat4;
+
+} // namespace "aliases"
 
 //
 // Constants.
@@ -92,6 +111,8 @@ constexpr LINA_FP kHalfPi       = 2.0 * kQuarterPi;
 constexpr LINA_FP kPi           = 4.0 * kQuarterPi;
 constexpr LINA_FP kTwoPi        = 8.0 * kQuarterPi;
 constexpr LINA_FP kInvPi        = 1.0 / kPi;
+constexpr LINA_FP kSqrtTwo      = 1.4142135623730951;
+constexpr LINA_FP kHalfSqrtTwo  = 0.5 * kSqrtTwo;
 
 //
 // Functions.
@@ -129,6 +150,13 @@ constexpr T saturate(T const& a) {
   static_assert( std::is_floating_point<T>::value );
   return clamp(a, 0, 1);
 }
+
+// ----------------------------------------------------------------------------
+
+template<class T> linalg::mat<T,4,4> rotation_matrix_axis(linalg::vec<T, 3> const& axis, T const angle) { return linalg::rotation_matrix(linalg::rotation_quat(linalg::normalize(axis), angle)); }
+template<class T> linalg::mat<T,4,4> rotation_matrix_x(T const angle) { return rotation_matrix_axis(linalg::vec<T, 3>(1.0f, 0.0f, 0.0f), angle); }
+template<class T> linalg::mat<T,4,4> rotation_matrix_y(T const angle) { return rotation_matrix_axis(linalg::vec<T, 3>(0.0f, 1.0f, 0.0f), angle); }
+template<class T> linalg::mat<T,4,4> rotation_matrix_z(T const angle) { return rotation_matrix_axis(linalg::vec<T, 3>(0.0f, 0.0f, 1.0f), angle); }
 
 // ----------------------------------------------------------------------------
 
