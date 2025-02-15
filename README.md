@@ -1,3 +1,6 @@
+[![unlicense](https://img.shields.io/badge/Unlicense-%23373737)](https://unlicense.org/)
+![Stage: alpha](https://img.shields.io/badge/-alpha-red)
+
 # lina
 
 **lina** is a lightweight & header only linear algebra library built as an extension to [linalg](https://github.com/sgorsten/linalg/tree/v2.2) v2.2 from Sterling Orsten.
