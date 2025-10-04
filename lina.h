@@ -1,4 +1,4 @@
-//  lina.h - v0.3.0
+//  lina.h - v0.4.0
 //
 //  Public domain linear algebra header, wrapping sgorsten/linalg.h
 //  <http://unlicense.org/>
@@ -77,6 +77,7 @@ using vec4u = vec4_t<uint32_t>;
 
 using mat3f = linalg::mat<LINA_FP, 3, 3>;
 using mat4f = linalg::mat<LINA_FP, 4, 4>;
+using mat3x4f = linalg::mat<LINA_FP, 3, 4>;
 // using mat3x3f = mat3f;
 // using mat4x4f = mat4f;
 
@@ -96,6 +97,7 @@ using ivec4 = vec4i;
 using mat3 = mat3f;
 using mat4 = mat4f;
 using mat3x3 = mat3;
+using mat3x4 = mat3x4f;
 using mat4x4 = mat4;
 
 } // namespace "aliases"
@@ -128,6 +130,7 @@ template<class T> constexpr linalg::vec<T, 2> to_vec2(linalg::vec<T, 3> const& v
 template<class T> constexpr linalg::vec<T, 3> to_vec3(linalg::vec<T, 4> const& v) { return {v.x,v.y,v.z}; }
 
 template<class T> constexpr linalg::mat<T, 3, 3> to_mat3(linalg::mat<T, 4, 4> const& v) { return {to_vec3(v.x),to_vec3(v.y),to_vec3(v.z)}; }
+template<class T> constexpr linalg::mat<T, 3, 4> to_mat3x4(linalg::mat<T, 4, 4> const& v) { return {to_vec3(v.x),to_vec3(v.y),to_vec3(v.z), to_vec3(v.w)}; }
 
 template<class T> constexpr linalg::vec<T, 4> qidentity() { return {0,0,0,1}; }
 
@@ -138,22 +141,31 @@ template<typename T> constexpr T min4(T const& a, T const& b, T const& c, T cons
 template<typename T> constexpr T max4(T const& a, T const& b, T const& c, T const& d) { return max( a, max( b, max( c, d))); }
 
 template<typename T>
-constexpr bool almost_equal(T const& a, T const& b, T tolerance = kEpsilon) {
+constexpr bool almost_equal(T const& a, T const& b, T tolerance) {
   static_assert(std::is_floating_point<T>::value);
   T const distance = linalg::abs(b - a);
   return (distance <= tolerance)
-      || (distance <= std::numeric_limits<T>::min() * std::fabs(b + a));
+      || (distance <= std::numeric_limits<T>::min() * linalg::abs(b + a));
+}
+
+constexpr bool almost_equal(aliases::vec3 const& a, aliases::vec3 const& b, float tolerance) {
+  return almost_equal(a.x, b.x, tolerance)
+      && almost_equal(a.y, b.y, tolerance)
+      && almost_equal(a.z, b.z, tolerance)
+      ;
 }
 
 template<typename T>
 constexpr T saturate(T const& a) {
   static_assert( std::is_floating_point<T>::value );
-  return clamp(a, 0, 1);
+  return linalg::clamp(a, 0, 1);
 }
 
 // ----------------------------------------------------------------------------
 
-template<class T, int M> constexpr linalg::vec<T,M> mul(const linalg::vec<T,4> & a, const linalg::mat<T,M,4> & b) { return a.x*b.row(0) + a.y*b.row(1) + a.z*b.row(2) + a.w*b.row(3); }
+template<class T, int M> constexpr linalg::vec<T,M> mul(const linalg::vec<T,4> & a, const linalg::mat<T,M,4> & b) {
+  return a.x*b.row(0) + a.y*b.row(1) + a.z*b.row(2) + a.w*b.row(3);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -168,6 +180,13 @@ template<typename T>
 constexpr T step(T const& a, T const& x) {
   static_assert( std::is_floating_point<T>::value );
   return static_cast<T>(select(a > x, 0, 1));
+}
+
+template<typename T>
+constexpr T smoothstep(T const& edge0, T const& edge1, T x) {
+  static_assert( std::is_floating_point<T>::value );
+  x = saturate((x - edge0) / (edge1 - edge0));
+  return x * x * (3.0 - 2.0 * x);
 }
 
 // Interpolate in two steps. ([0, 0.5, 1.0]->[a, b, c])
@@ -208,7 +227,7 @@ constexpr T gain(T const& a, T const& b) {
   if (a > (1.0-kEpsilon)) {
     return 1.0;
   }
-  const T bb = clamp(b, kEpsilon, 1.0 - kEpsilon);
+  const T bb = linalg::clamp(b, kEpsilon, 1.0 - kEpsilon);
   const T e = log(1.0-bb) / kHalfLog;
   auto f = [e](auto x) { return pow(2.0 * x, e) / 2.0; };
   return (a < 0.5) ? f(a) : 1.0 - f(1.0 - a);
@@ -284,7 +303,7 @@ bool solve_basic_ik(T const lenA, T const lenB, const linalg::vec<T, 3>& target,
     }
 
     linalg::vec<T, 3> S;
-    S.x = clamp(0.5 * (lenR + (lenA2 - lenB2) / lenR), 0.0, (1.0 - kEpsilon) * lenA);
+    S.x = linalg::clamp(0.5 * (lenR + (lenA2 - lenB2) / lenR), 0.0, (1.0 - kEpsilon) * lenA);
 
     T const ySquared = lenA2 - S.x * S.x;
     if (ySquared < 0.0) {
