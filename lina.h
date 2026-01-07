@@ -1,4 +1,4 @@
-//  lina.h - v0.5.0
+//  lina.h - v0.8.0
 //
 //  Public domain linear algebra header, wrapping sgorsten/linalg.h
 //  <http://unlicense.org/>
@@ -81,6 +81,8 @@ using mat3x4f = linalg::mat<LINA_FP, 3, 4>;
 // using mat3x3f = mat3f;
 // using mat4x4f = mat4f;
 
+using quat = vec4f;
+
 // GLSL types
 using vec2 = vec2f;
 using vec3 = vec3f;
@@ -138,8 +140,6 @@ template<class T> constexpr linalg::mat<T, 4, 4> to_mat4(linalg::mat<T, 3, 3> co
 
 template<class T> constexpr linalg::mat<T, 4, 4> remove_translation(linalg::mat<T, 4, 4> const& v) { return {v.x,v.y,v.z, {0, 0, 0, 1}}; }
 
-template<class T> constexpr linalg::vec<T, 4> qidentity() { return {0,0,0,1}; }
-
 template<class T> constexpr T degrees(T const& _radians) { return _radians * (180.0 / kPi); }
 template<class T> constexpr T radians(T const& _degrees) { return _degrees * (kPi / 180.0); }
 
@@ -191,6 +191,22 @@ template<class T> linalg::mat<T,4,4> rotation_matrix_z(T const angle) { return r
 
 // ----------------------------------------------------------------------------
 
+template<class T>
+linalg::mat<T,4,4> look_dir_matrix(linalg::vec<T,3> const& U) {
+  auto Z = -normalize(U);
+  auto up = std::abs(Z.y) < T(0.999) ? linalg::vec<T,3>{0,1,0} : linalg::vec<T,3>{1,0,0};
+  auto X = normalize(cross(up, Z));
+  auto Y = cross(Z, X);
+  return linalg::mat<T,4,4>(
+    to_vec4<T>(X, 0.0),
+    to_vec4<T>(Y, 0.0),
+    to_vec4<T>(Z, 0.0),
+    {0,0,0,1}
+  );
+}
+
+// ----------------------------------------------------------------------------
+
 template<class T, int M>
 constexpr linalg::vec<T, M> quadratic_bezier(
   linalg::vec<T, M> const& a, // start point
@@ -204,10 +220,27 @@ constexpr linalg::vec<T, M> quadratic_bezier(
   return u * a + v * b + w * c;
 }
 
+template<class T, int M>
+constexpr linalg::vec<T, M> cubic_bezier(
+  linalg::vec<T, M> const& a,
+  linalg::vec<T, M> const& b,
+  linalg::vec<T, M> const& c,
+  linalg::vec<T, M> const& d,
+  T x
+) {
+  T nx = 1.0 - x;
+  T nx2 = nx * nx;
+  return (nx2 * nx) * a
+       + (3 * nx2 * x) * b
+       + (3 * nx * x * x) * c
+       + (x * x * x) * d
+       ;
+}
+
 template<class T>
 constexpr T step(T const& a, T const& x) {
   static_assert( std::is_floating_point<T>::value );
-  return static_cast<T>(select(a > x, 0, 1));
+  return static_cast<T>(linalg::select(a > x, 0, 1));
 }
 
 template<class T>
@@ -368,6 +401,16 @@ bool solve_basic_ik(
 END_LINA_NAMESPACE
 
 /* -------------------------------------------------------------------------- */
+
+namespace linalg {
+
+template<class T> struct converter<vec<T, 4>, identity_t> {
+  constexpr vec<T, 4> operator() (identity_t) const { return {0,0,0,1}; }
+};
+
+}
+
+// ----------------------------------------------------------------------------
 
 //
 // Types interoperability.
