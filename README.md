@@ -9,8 +9,8 @@ It's basically linalg with extra steps and a different namespace.
 ### Features (non exhaustive)
 
 #### Custom Aliases
-   - Defines 2D, 3D, and 4D vector types (`vec2`, `vec3`, `vec4`) and matrices (`mat3f`, `mat4f`) using both floating-point and integer types.
-   - Includes common shorthand types like `vec2f`, `vec3i`, `vec4u`, etc., for convenience.
+   - Defines 2D, 3D, and 4D vector types (eg. `vec2i`, `vec3u`, `vec4f`) and matrices (eg. `mat3x4f`, `mat4f`) using both floating-point and integer types.
+   - Includes aliases for GLSL (eg. `ivec2`, `uvec3`, `vec4`, `mat4`) and Slang (eg. `int2`, `uint3`, `float4`, `float4x4`) 
 
 #### Mathematical Constants
    - Predefined constants: `kTwoPi`, `kPi`, `kHalfPi`, `kQuarterPi`, `kInvPi`, `kSqrtTwo`, `kHalfLog`, `kEpsilon`.
