@@ -1,4 +1,4 @@
-//  lina.h - v0.12.0
+//  lina.h - v0.13.0
 //
 //  Public domain linear algebra header, wrapping sgorsten/linalg.h
 //  <http://unlicense.org/>
@@ -8,6 +8,15 @@
 #define LINA_LINA_H_
 
 /* -------------------------------------------------------------------------- */
+
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
+#include <iosfwd>
+#include <limits>
+#include <type_traits>
 
 #if !defined(_MSC_VER)
 #define _MSC_VER 1901
@@ -20,8 +29,6 @@
 #undef _MSC_VER
 #undef UNDEF_MSC_VER
 #endif
-
-#include <limits>
 
 #if defined(LINA_OSTREAM)
 #include <iostream>
@@ -165,8 +172,8 @@ using mat4x4 = mat4f;
 //
 constexpr LINA_FP kTrueEpsilon  = std::numeric_limits<LINA_FP>::epsilon();
 constexpr LINA_FP kEpsilon      = 10.0f * kTrueEpsilon;
-constexpr LINA_FP kHalfLog      = -0.693147180599;  // log(0.5);
-constexpr LINA_FP kQuarterPi    = 0.785398163397;   // atanf(1.0f);
+constexpr LINA_FP kHalfLog      = -0.693147180559945309;  // log(0.5);
+constexpr LINA_FP kQuarterPi    = 0.785398163397448310;   // atan(1.0);
 constexpr LINA_FP kHalfPi       = 2.0 * kQuarterPi;
 constexpr LINA_FP kPi           = 4.0 * kQuarterPi;
 constexpr LINA_FP kTwoPi        = 8.0 * kQuarterPi;
@@ -197,8 +204,8 @@ template<class T> constexpr mat<T, 4, 4> to_mat4(mat<T, 3, 3> const& v) { return
 
 template<class T> constexpr mat<T, 4, 4> remove_translation(mat<T, 4, 4> const& v) { return {v.x,v.y,v.z, {0, 0, 0, 1}}; }
 
-template<class T> constexpr T degrees(T const& _radians) { return _radians * (180.0 / kPi); }
-template<class T> constexpr T radians(T const& _degrees) { return _degrees * (kPi / 180.0); }
+template<class T> constexpr T degrees(T const& _radians) { return _radians * T(180.0 / kPi); }
+template<class T> constexpr T radians(T const& _degrees) { return _degrees * T(kPi / 180.0); }
 
 template<class T> constexpr T min4(T const& a, T const& b, T const& c, T const& d) { return min( a, min( b, min( c, d))); }
 template<class T> constexpr T max4(T const& a, T const& b, T const& c, T const& d) { return max( a, max( b, max( c, d))); }
@@ -211,7 +218,7 @@ constexpr bool almost_equal(T const& a, T const& b, T tolerance) {
       || (distance <= std::numeric_limits<T>::min() * abs(b + a));
 }
 
-constexpr bool almost_equal(aliases::vec3 const& a, aliases::vec3 const& b, float tolerance) {
+constexpr bool almost_equal(aliases::vec3 const& a, aliases::vec3 const& b, LINA_FP tolerance) {
   return almost_equal(a.x, b.x, tolerance)
       && almost_equal(a.y, b.y, tolerance)
       && almost_equal(a.z, b.z, tolerance)
@@ -226,7 +233,7 @@ T sign(T val) {
 template<class T>
 constexpr T saturate(T const& a) {
   static_assert( std::is_floating_point<T>::value );
-  return clamp(a, 0, 1);
+  return clamp(a, T(0), T(1));
 }
 
 // ----------------------------------------------------------------------------
@@ -239,7 +246,7 @@ vec<T,4> normalize_plane(vec<T,4> const& a) {
 // ----------------------------------------------------------------------------
 
 template<class T, int M>
-constexpr vec<T,M> row_mul(vec<T,4> const& a, mat<T,M,4> const& b) {
+constexpr vec<T,M> row_mul(vec<T,4> const& a, mat<T,4,M> const& b) {
   return a.x * b.row(0)
        + a.y * b.row(1)
        + a.z * b.row(2)
@@ -329,8 +336,6 @@ template<class T> mat<T,4,4> rotation_matrix_x(T const angle) { return rotation_
 template<class T> mat<T,4,4> rotation_matrix_y(T const angle) { return rotation_matrix_axis(vec<T, 3>(0.0f, 1.0f, 0.0f), angle); }
 template<class T> mat<T,4,4> rotation_matrix_z(T const angle) { return rotation_matrix_axis(vec<T, 3>(0.0f, 0.0f, 1.0f), angle); }
 
-// template<class T> mat<T,4,4> scaling_matrix(T const s) { return scaling_matrix(vec<T, 3>(s)); }
-
 // ----------------------------------------------------------------------------
 
 template<class T> mat<T,4,4> translation_matrix_x(T const x) { return translation_matrix(vec<T, 3>(   x, 0.0f, 0.0f)); }
@@ -362,8 +367,8 @@ constexpr vec<T, M> quadratic_bezier(
   vec<T, M> const& c, // end point
   T x
 ) {
-  T u = (1.0 - x) * (1.0 - x);
-  T v = 2.0 * x * (1.0 - x);
+  T u = (T(1) - x) * (T(1) - x);
+  T v = T(2) * x * (T(1) - x);
   T w = x * x;
   return u * a + v * b + w * c;
 }
@@ -376,7 +381,7 @@ constexpr vec<T, M> cubic_bezier(
   vec<T, M> const& d,
   T x
 ) {
-  T nx = 1.0 - x;
+  T nx = T(1) - x;
   T nx2 = nx * nx;
   return (nx2 * nx) * a
        + (3 * nx2 * x) * b
@@ -395,7 +400,7 @@ template<class T>
 constexpr T smoothstep(T const& edge0, T const& edge1, T x) {
   static_assert( std::is_floating_point<T>::value );
   x = saturate((x - edge0) / (edge1 - edge0));
-  return x * x * (3.0 - 2.0 * x);
+  return x * x * (T(3) - T(2) * x);
 }
 
 // Interpolate in two steps. ([0, 0.5, 1.0]->[a, b, c])
@@ -404,7 +409,7 @@ constexpr T trilerp(T const& a, T const& b, T const& c, T const& x) {
   static_assert( std::is_floating_point<T>::value );
   T l1 = a + 2 * x * (b - a);
   T l2 = b + 2 * (x - 1) * (c - b);
-  return lerp(l1, l2, step(0.5, x));
+  return lerp(l1, l2, step(T(0.5), x));
 }
 
 // Interpolate following a pyramid curve. ([0, 0.5, 1.0]->[a, b, a])
@@ -419,10 +424,10 @@ template<class T>
 constexpr T bias(T const& a, T const& b) {
   static_assert( std::is_floating_point<T>::value );
   if (a < kEpsilon || b < kEpsilon) {
-    return 0.0;
+    return T(0);
   }
-  if (a > (1.0-kEpsilon) || b > (1.0-kEpsilon)) {
-    return 1.0;
+  if (a > (T(1)-kEpsilon) || b > (T(1)-kEpsilon)) {
+    return T(1);
   }
   return pow(a, log(b) / kHalfLog);
 }
@@ -431,15 +436,15 @@ template<class T>
 constexpr T gain(T const& a, T const& b) {
   static_assert( std::is_floating_point<T>::value );
   if (a < kEpsilon) {
-    return 0.0;
+    return T(0);
   }
-  if (a > (1.0-kEpsilon)) {
-    return 1.0;
+  if (a > (T(1)-kEpsilon)) {
+    return T(1);
   }
-  const T bb = clamp(b, kEpsilon, 1.0 - kEpsilon);
-  const T e = log(1.0-bb) / kHalfLog;
-  auto f = [e](auto x) { return pow(2.0 * x, e) / 2.0; };
-  return (a < 0.5) ? f(a) : 1.0 - f(1.0 - a);
+  const T bb = clamp(b, T(kEpsilon), T(1) - T(kEpsilon));
+  const T e = log(T(1)-bb) / T(kHalfLog);
+  auto f = [e](T x) { return pow(T(2) * x, e) / T(2); };
+  return (a < T(0.5)) ? f(a) : T(1) - f(T(1) - a);
 
   // equivalent to :
   //return lerp(f(a), 1.0-f(1.0-a), step(0.5, a));
@@ -480,17 +485,13 @@ mat<T,4,4> perspective_fov_matrix(
 
 template <class T>
 constexpr mat<T, 4, 4> rigidbody_inverse(const mat<T, 4, 4>& a) {
-  auto rt = transpose(mat<T, 3, 3>{
-    {a[0][0], a[0][1], a[0][2]},
-    {a[1][0], a[1][1], a[1][2]},
-    {a[2][0], a[2][1], a[2][2]}
-  });
-  auto inv_t = - mul(rt, vec<T, 3>{ a[0][3], a[1][3], a[2][3] });
+  auto rt = transpose(to_mat3(a));
+  auto inv_t = -mul(rt, to_vec3(a[3]));
   return mat<T, 4, 4>{
-    {rt[0][0], rt[0][1], rt[0][2], inv_t[0]},
-    {rt[1][0], rt[1][1], rt[1][2], inv_t[1]},
-    {rt[2][0], rt[2][1], rt[2][2], inv_t[2]},
-    {0.0, 0.0, 0.0, 1.0}
+    to_vec4(rt[0]),
+    to_vec4(rt[1]),
+    to_vec4(rt[2]),
+    to_vec4(inv_t, T(1))
   };
 }
 
@@ -566,6 +567,8 @@ template<class T> struct converter<vec<T, 4>, identity_t> {
 
 #if defined(LINA_OSTREAM)
 
+namespace linalg {
+
 template<class T> std::ostream &operator<<(std::ostream& o, vec<T,2> const& v) {
   return o << "(" << v.x << ", " << v.y << ")";
 }
@@ -594,6 +597,8 @@ template<class T, int N> std::ostream &operator<<(std::ostream& o, mat<T,4,N> co
            << m.row(1) << std::endl
            << m.row(2) << std::endl
            << m.row(3);
+}
+
 }
 
 #endif
