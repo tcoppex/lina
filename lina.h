@@ -1,4 +1,4 @@
-//  lina.h - v0.11.0
+//  lina.h - v0.12.0
 //
 //  Public domain linear algebra header, wrapping sgorsten/linalg.h
 //  <http://unlicense.org/>
@@ -231,6 +231,13 @@ constexpr T saturate(T const& a) {
 
 // ----------------------------------------------------------------------------
 
+template<class T>
+vec<T,4> normalize_plane(vec<T,4> const& a) {
+  return a / length(to_vec3(a));
+}
+
+// ----------------------------------------------------------------------------
+
 template<class T, int M>
 constexpr vec<T,M> row_mul(vec<T,4> const& a, mat<T,M,4> const& b) {
   return a.x * b.row(0)
@@ -323,6 +330,12 @@ template<class T> mat<T,4,4> rotation_matrix_y(T const angle) { return rotation_
 template<class T> mat<T,4,4> rotation_matrix_z(T const angle) { return rotation_matrix_axis(vec<T, 3>(0.0f, 0.0f, 1.0f), angle); }
 
 // template<class T> mat<T,4,4> scaling_matrix(T const s) { return scaling_matrix(vec<T, 3>(s)); }
+
+// ----------------------------------------------------------------------------
+
+template<class T> mat<T,4,4> translation_matrix_x(T const x) { return translation_matrix(vec<T, 3>(   x, 0.0f, 0.0f)); }
+template<class T> mat<T,4,4> translation_matrix_y(T const y) { return translation_matrix(vec<T, 3>(0.0f,    y, 0.0f)); }
+template<class T> mat<T,4,4> translation_matrix_z(T const z) { return translation_matrix(vec<T, 3>(0.0f, 0.0f,    z)); }
 
 // ----------------------------------------------------------------------------
 
